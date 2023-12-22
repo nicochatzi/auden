@@ -1,7 +1,14 @@
 [package]
-name = "sample-pool"
+name = "auden"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
+description = "Audio Engine"
+readme = "README.md"
+homepage = "https://github.com/nicochatzi/auden"
+repository = "https://github.com/nicochatzi/auden"
+keywords = ["dsp", "audio", "graph", "no_std"]
+categories = [""]
 
 [[bench]]
 name = "buffer"
