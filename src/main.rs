@@ -1,5 +1,5 @@
 use clap::Parser;
-use sample_pool::{buffer::*, play, plot, pool::*};
+use auden::{buffer::*, play, plot, pool::*};
 use std::path::PathBuf;
 
 #[derive(Parser, Debug)]
