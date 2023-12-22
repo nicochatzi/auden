@@ -4,11 +4,11 @@
 
 ### Goals
 
-Library to build rich audio applications, e.g. complex instruments or a DAW.
+Yet another thing that looks like a real-time audio engine in Rust.
 
-- On nightly for SIMD, Allocator API, in-place Arc-slice construction...
 - Spiritual successor to [rume](https:://github.com/nicochatzi/rume).
 - Runtime tooling provided by [aud](https://github.com/nicochatzi/aud).
+- On nightly for SIMD, Allocator API, in-place Arc-slice construction...
 
 ### Ideas
 
