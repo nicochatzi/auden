@@ -1,18 +1,14 @@
-extern crate alloc;
-
 use crate::dsp::interleave::*;
-use alloc::sync::Arc;
 use core::{mem::MaybeUninit, ops::Deref};
+use std::{sync::Arc, vec, vec::Vec};
 
 #[derive(Debug, Clone)]
-pub struct SharedBuffer {
-    data: Arc<[f32]>,
-}
+pub struct SharedBuffer(Arc<[f32]>);
 
 impl AsRef<[f32]> for SharedBuffer {
     #[inline(always)]
     fn as_ref(&self) -> &[f32] {
-        self.data.as_ref()
+        self.0.as_ref()
     }
 }
 
@@ -21,32 +17,28 @@ impl Deref for SharedBuffer {
 
     #[inline(always)]
     fn deref(&self) -> &Self::Target {
-        self.data.as_ref()
+        self.0.as_ref()
     }
 }
 
 impl From<&[f32]> for SharedBuffer {
     #[inline(always)]
     fn from(values: &[f32]) -> Self {
-        Self {
-            data: Arc::from(values),
-        }
+        Self(Arc::from(values))
     }
 }
 
 impl<const N: usize> From<[f32; N]> for SharedBuffer {
     #[inline(always)]
     fn from(values: [f32; N]) -> Self {
-        Self {
-            data: Arc::from(values),
-        }
+        Self(Arc::from(values))
     }
 }
 
 impl From<Vec<f32>> for SharedBuffer {
     #[inline(always)]
     fn from(data: Vec<f32>) -> Self {
-        Self { data: data.into() }
+        Self(data.into())
     }
 }
 
@@ -61,15 +53,13 @@ impl SharedBuffer {
             *value = MaybeUninit::new(sample);
         }
 
-        Self {
-            data: unsafe { container.assume_init() },
-        }
+        Self(unsafe { container.assume_init() })
     }
 
     /// Is this buffer the only reference to its data?
     #[inline]
     pub fn is_unique(&self) -> bool {
-        Arc::strong_count(&self.data) == 1
+        Arc::strong_count(&self.0) == 1
     }
 }
 
@@ -143,17 +133,17 @@ impl SharedAudioBuffer {
         }
     }
 
-    pub fn left(&self) -> SharedBuffer {
+    pub fn left(&self) -> &[f32] {
         match self {
-            Self::Mono(b) => b.clone(),
-            Self::Stereo(b) => b.l.clone(),
+            Self::Mono(b) => b.as_ref(),
+            Self::Stereo(b) => b.l.as_ref(),
         }
     }
 
-    pub fn right(&self) -> SharedBuffer {
+    pub fn right(&self) -> &[f32] {
         match self {
-            Self::Mono(b) => b.clone(),
-            Self::Stereo(b) => b.r.clone(),
+            Self::Mono(b) => b.as_ref(),
+            Self::Stereo(b) => b.r.as_ref(),
         }
     }
 }

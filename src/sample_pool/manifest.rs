@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use std::{fs::File, hash::Hash, io, path::Path};
 
 #[derive(Serialize, Deserialize, Clone, Hash, PartialEq, Eq, Debug)]
-pub struct PoolManifestEntry {
+pub struct ManifestEntry {
     pub path: std::path::PathBuf,
     pub size: usize,
     pub name: String,
@@ -11,13 +11,13 @@ pub struct PoolManifestEntry {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct PoolManifest {
+pub struct Manifest {
     pub hash: u32,
-    pub entries: Vec<PoolManifestEntry>,
+    pub entries: Vec<ManifestEntry>,
 }
 
-impl PoolManifest {
-    pub fn new(entries: Vec<PoolManifestEntry>) -> Self {
+impl Manifest {
+    pub fn new(entries: Vec<ManifestEntry>) -> Self {
         let mut hasher = Crc32Hasher::new();
         entries.iter().for_each(|e| e.hash(&mut hasher));
         let hash = hasher.finalize();

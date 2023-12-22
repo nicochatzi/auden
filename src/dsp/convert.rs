@@ -44,9 +44,6 @@ pub mod tick {
 
 ///
 pub mod pitch {
-    #[cfg(not(feature = "std"))]
-    use crate::F32Extension;
-
     /// From a frequency in hertz to a number of cycles per sample.
     #[inline(always)]
     pub fn to_cycles(freq: f32, rate: f32) -> f32 {
@@ -93,9 +90,6 @@ pub mod rad {
 
 ///
 pub mod db {
-    #[cfg(not(feature = "std"))]
-    use crate::F32Extension;
-
     ///
     #[inline(always)]
     pub fn to_gain(db: f32) -> f32 {

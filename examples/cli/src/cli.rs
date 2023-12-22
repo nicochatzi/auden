@@ -1,7 +1,9 @@
+mod plot;
+mod play;
+
 use auden::buffer::shared::SharedAudioBuffer;
 use auden::sample_pool::manifest::PoolManifest;
 use auden::sample_pool::pool::{PoolHolding, SamplePool};
-use auden::stream::{play, plot};
 use clap::Parser;
 use std::path::PathBuf;
 

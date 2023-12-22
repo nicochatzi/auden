@@ -33,15 +33,8 @@ impl From<std::io::Error> for SampleError {
     }
 }
 
-#[repr(transparent)]
 #[derive(Debug, Clone, Copy, Hash, PartialEq, Eq, PartialOrd, Ord)]
 pub struct SampleId(uuid::Uuid);
-
-pub trait PoolHolding {
-    fn sample(&self, id: SampleId) -> Option<SharedAudioBuffer>;
-    fn sample_count(&self) -> usize;
-    fn live_memory(&self) -> usize;
-}
 
 #[derive(Default)]
 pub struct SamplePool {
@@ -49,22 +42,8 @@ pub struct SamplePool {
     files: HashMap<SampleId, std::path::PathBuf, core::hash::BuildHasherDefault<Crc32Hasher>>,
 }
 
-impl PoolHolding for SamplePool {
-    fn sample(&self, id: SampleId) -> Option<SharedAudioBuffer> {
-        self.samples.get(&id).cloned()
-    }
-
-    fn sample_count(&self) -> usize {
-        self.samples.len()
-    }
-
-    fn live_memory(&self) -> usize {
-        self.samples.values().map(|b| b.size()).sum()
-    }
-}
-
 impl SamplePool {
-    pub fn from_manifest(manifest: PoolManifest) -> Result<Self, SampleError> {
+    pub fn from_manifest(manifest: Manifest) -> Result<Self, SampleError> {
         manifest
             .entries
             .iter()
@@ -74,12 +53,12 @@ impl SamplePool {
             })
     }
 
-    pub fn build_manifest(&self) -> Result<PoolManifest, io::Error> {
-        let mut entries = Vec::<PoolManifestEntry>::with_capacity(self.files.len());
+    pub fn build_manifest(&self) -> Result<Manifest, io::Error> {
+        let mut entries = Vec::<ManifestEntry>::with_capacity(self.files.len());
         let mut buffer = Vec::with_capacity(4096);
 
         for (id, path) in &self.files {
-            entries.push(PoolManifestEntry {
+            entries.push(ManifestEntry {
                 path: path.clone(),
                 size: self.samples[id].size(),
                 hash: hash_file_contents(path, &mut buffer)?,
@@ -91,7 +70,7 @@ impl SamplePool {
             });
         }
 
-        Ok(PoolManifest::new(entries))
+        Ok(Manifest::new(entries))
     }
 
     pub fn from_dir(path: impl AsRef<Path>) -> Result<Self, SampleError> {
@@ -156,6 +135,18 @@ impl SamplePool {
             .map(|(id, buffer)| (*id, buffer.clone()))
     }
 
+    pub fn sample(&self, id: SampleId) -> Option<SharedAudioBuffer> {
+        self.samples.get(&id).cloned()
+    }
+
+    pub fn sample_count(&self) -> usize {
+        self.samples.len()
+    }
+
+    pub fn live_memory(&self) -> usize {
+        self.samples.values().map(|b| b.size()).sum()
+    }
+
     fn insert_sample(
         &mut self,
         buffer: SharedAudioBuffer,
@@ -187,13 +178,12 @@ fn load_f32_wav(reader: hound::WavReader<io::BufReader<File>>) -> SharedBuffer {
 
 #[inline]
 fn load_i16_wav(reader: hound::WavReader<io::BufReader<File>>) -> SharedBuffer {
-    const I16_TO_FLOAT: f32 = 1.0 / i16::MAX as f32;
-
     let num_samples = reader.len() as usize;
     reader
         .into_samples::<i16>()
         .filter_map(Result::ok)
         .fold(Vec::with_capacity(num_samples), |mut output, sample| {
+            const I16_TO_FLOAT: f32 = 1.0 / i16::MAX as f32;
             output.push(sample as f32 * I16_TO_FLOAT);
             output
         })
@@ -202,14 +192,13 @@ fn load_i16_wav(reader: hound::WavReader<io::BufReader<File>>) -> SharedBuffer {
 
 #[inline]
 fn load_i24_wav(reader: hound::WavReader<io::BufReader<File>>) -> SharedBuffer {
-    const I24_MAX: i32 = (1 << 23) - 1;
-    const I24_TO_FLOAT: f32 = 1.0 / I24_MAX as f32;
-
     let num_samples = reader.len() as usize;
     reader
         .into_samples::<i32>()
         .filter_map(Result::ok)
         .fold(Vec::with_capacity(num_samples), |mut output, sample| {
+            const I24_MAX: i32 = (1 << 23) - 1;
+            const I24_TO_FLOAT: f32 = 1.0 / I24_MAX as f32;
             output.push(sample as f32 * I24_TO_FLOAT);
             output
         })

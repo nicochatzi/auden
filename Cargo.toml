@@ -7,12 +7,8 @@ description = "Audio Engine"
 readme = "README.md"
 homepage = "https://github.com/nicochatzi/auden"
 repository = "https://github.com/nicochatzi/auden"
-keywords = ["multimedia", "multimedia::audio", "no-std"]
+keywords = ["multimedia", "multimedia::audio"]
 categories = [""]
-
-[features]
-default = ["std"]
-std = ["plotly", "hound"]
 
 [[bench]]
 name = "buffer"
@@ -30,20 +26,18 @@ opt-level = 3
 lto = "fat"
 
 [dependencies]
-# no-std dependencies
-hashbrown = { version = "0.14.3", default-features = false, features = [
-  "nightly",
-] }
-serde = { version = "1.0.193", default-features = false, features = ["derive"] }
-serde_json = { version = "1.0.108", default-features = false }
-uuid = { version = "1.6.1", default-features = false, features = ["v4"] }
+hashbrown = { version = "0.14.3", features = ["nightly"] }
+serde = { version = "1.0.193", features = ["derive"] }
+serde_json = "1.0.108"
+uuid = { version = "1.6.1", features = ["v4", "zerocopy"] }
 crc32fast = { version = "1.3.2", features = ["nightly"] }
-log = { version = "0.4.20", default-features = false }
-# std dependencies
-plotly = { version = "0.8.4", optional = true }
-hound = { version = "3.5.1", optional = true }
+log = "0.4.20"
+libm = "0.2.1"
+hound = "3.5.1"
 
 [dev-dependencies]
 criterion = "0.5.1"
 tempfile = "3.8.1"
 rand = "0.8.5"
+plotly = "0.8.4"
+cpal = "0.15.2"
