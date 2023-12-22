@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use sample_pool::pool::*;
+use auden::sample_pool::pool::*;
 use std::path::PathBuf;
 
 fn build_sample_dir() -> PathBuf {

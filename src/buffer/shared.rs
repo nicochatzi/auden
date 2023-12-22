@@ -1,5 +1,6 @@
 extern crate alloc;
 
+use crate::dsp::interleave::*;
 use alloc::sync::Arc;
 use core::{mem::MaybeUninit, ops::Deref};
 
@@ -94,7 +95,9 @@ impl SharedAudioBuffer {
     }
 
     pub fn from_stereo_interleaved(data: SharedBuffer) -> Self {
-        let (l, r) = deinterleave_stereo(data);
+        let len = data.len() / 2;
+        let (mut l, mut r) = (vec![0.; len], vec![0.; len]);
+        deinterleave_stereo(data, (&mut l, &mut r));
         SharedAudioBuffer::Stereo(SharedStereoBuffer {
             l: l.into(),
             r: r.into(),
@@ -153,40 +156,6 @@ impl SharedAudioBuffer {
             Self::Stereo(b) => b.r.clone(),
         }
     }
-}
-
-#[inline]
-pub fn interleave_stereo(input: (impl AsRef<[f32]>, impl AsRef<[f32]>), output: &mut [f32]) {
-    let (l, r) = (input.0.as_ref(), input.1.as_ref());
-    let num_samples = l.len().min(r.len().min(output.len()));
-
-    for sample in 0..num_samples {
-        output[sample * 2] = l[sample];
-    }
-
-    for sample in 0..num_samples {
-        output[sample * 2 + 1] = r[sample];
-    }
-}
-
-#[inline]
-pub fn deinterleave_stereo(buffer: impl AsRef<[f32]>) -> (Vec<f32>, Vec<f32>) {
-    const NUM_CHANNELS: usize = 2;
-
-    let buffer = buffer.as_ref();
-    let num_samples = buffer.len() / NUM_CHANNELS;
-
-    let mut left = vec![0.; num_samples];
-    for sample in 0..num_samples {
-        left[sample] = buffer[sample * NUM_CHANNELS];
-    }
-
-    let mut right = vec![0.; num_samples];
-    for sample in 0..num_samples {
-        right[sample] = buffer[sample * NUM_CHANNELS + 1];
-    }
-
-    (left, right)
 }
 
 #[cfg(test)]

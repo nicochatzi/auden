@@ -1,5 +1,5 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
-use sample_pool::buffer::*;
+use auden::buffer::shared::*;
 
 pub fn from_iter_l1(c: &mut Criterion) {
     let data = [1., 2., 3., 4., 5., 6., 7., 8.];
