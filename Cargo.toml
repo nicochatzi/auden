@@ -37,7 +37,7 @@ hound = "3.5.1"
 
 [dev-dependencies]
 criterion = "0.5.1"
-tempfile = "3.8.1"
+tempfile = "3.10.1"
 rand = "0.8.5"
 plotly = "0.8.4"
 cpal = "0.15.2"
